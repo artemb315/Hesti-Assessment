@@ -1,3 +1,4 @@
+import { useRef } from "react";
 import { GoogleMap, LoadScript } from "@react-google-maps/api";
 import { useSelector, useDispatch } from "react-redux";
 import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
@@ -42,10 +43,10 @@ const MapContainer = () => {
 
   const isNormalStatus = currentStatus === NORMAL_STATUS;
 
-  const defaultCenter = {
+  const initialCenter = useRef({
     lat: 40.748817,
     lng: -73.985428,
-  };
+  }).current;
 
   const handleAddMarker = () => {
     dispatch(setStatus(MARKER_ADDING_STATUS));
@@ -106,7 +107,7 @@ const MapContainer = () => {
       <GoogleMap
         mapContainerClassName="w-full h-full"
         zoom={13}
-        center={defaultCenter}
+        center={initialCenter}
         mapTypeId="hybrid"
         onClick={handleMapClick}
       >
