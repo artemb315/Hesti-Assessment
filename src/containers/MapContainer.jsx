@@ -154,16 +154,28 @@ const MapContainer = () => {
         </div>
         {currentStatus === MARKER_ADDING_STATUS &&
           currentMarker?.lat &&
-          currentMarker?.lng && <MapMarker coord={currentMarker} />}
+          currentMarker?.lng && (
+            <MapMarker coord={currentMarker} type={MARKER_ADDING_STATUS} />
+          )}
         {markerPositions &&
           markerPositions.length &&
           markerPositions.map((position, index) => (
-            <MapMarker key={index} coord={position} />
+            <MapMarker
+              key={index}
+              coord={position}
+              type={MARKER_ADDING_STATUS}
+            />
           ))}
         {currentStatus === POLYGON_DRAWING_STATUS &&
           currentPolygon &&
           currentPolygon.length && (
-            <MapPolygon type="current" coordinates={currentPolygon} />
+            <>
+              <MapPolygon type="current" coordinates={currentPolygon} />
+              <MapMarker
+                coord={currentPolygon[currentPolygon.length - 1]}
+                type={POLYGON_DRAWING_STATUS}
+              />
+            </>
           )}
         {allPolygons &&
           allPolygons.length &&
