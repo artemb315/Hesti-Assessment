@@ -7,11 +7,12 @@ import ManagementTab from "./ManagementTab";
 
 import { setStatus } from "../store/slices/globalSlice";
 import { newCurrentMarker } from "../store/slices/markerSlice";
+import { newCurrentPolygon } from "../store/slices/polygonSlice";
 import {
   POLYGON_MANAGEMENT_TABLE,
   MARKER_MANAGEMENT_TABLE,
 } from "../constants";
-import { MARKER_ADDING_STATUS } from "../constants";
+import { POLYGON_DRAWING_STATUS, MARKER_ADDING_STATUS } from "../constants";
 
 const ManagementTopBar = ({ tableType, setTableType }) => {
   const allMarkers = useSelector((state) => state.marker.markerPositions) || [];
@@ -26,7 +27,8 @@ const ManagementTopBar = ({ tableType, setTableType }) => {
 
   const handleAdd = () => {
     if (isPolygonTable) {
-      console.log("add polygon");
+      dispatch(setStatus(POLYGON_DRAWING_STATUS));
+      dispatch(newCurrentPolygon());
     } else {
       dispatch(setStatus(MARKER_ADDING_STATUS));
       dispatch(newCurrentMarker());

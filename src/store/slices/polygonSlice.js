@@ -2,6 +2,7 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
   selectedId: -1,
+  editingId: -1,
   currentPolygon: {},
   polygons: [],
   no: 1,
@@ -11,35 +12,73 @@ export const polygonSlice = createSlice({
   name: "polygon",
   initialState,
   reducers: {
-    setSelectedPolygonId: (state, action) => {
-      state.selectedId = action.payload;
-    },
-    setCurrentPolygon: (state, action) => {
+    newCurrentPolygon: (state) => {
       state.currentPolygon = {
         id: state.no,
         name: `Polygon ${state.no}`,
-        positions: action.payload,
+        positions: [],
       };
-      state.no += 1;
     },
-    addPositionToCurrent: (state, action) => {
-      state.currentPolygon = {
-        ...state.currentPolygon,
-        positions: [...state.currentPolygon.positions, action.payload],
-      };
+    setSelectedPolygonId: (state, action) => {
+      state.selectedId = action.payload;
+    },
+    setEditingId: (state, action) => {
+      state.editingId = action.payload;
+    },
+    setCurrentPolygonName: (state, action) => {
+      state.currentPolygon.name = action.payload;
+    },
+    setEditingPolygonName: (state, action) => {
+      const editingPolygon = state.polygons.find(
+        (polygon) => polygon.id === state.editingId,
+      );
+      editingPolygon.name = action.payload;
+    },
+    addPositiontoCurrentPolygon: (state, action) => {
+      state.currentPolygon.positions = [
+        ...state.currentPolygon.positions,
+        action.payload,
+      ];
+    },
+    setCurrentPolygonPositions: (state, action) => {
+      state.currentPolygon.positions = action.payload;
+    },
+    setEditingPolygonPositions: (state, action) => {
+      const editingPolygon = state.polygons.find(
+        (polygon) => polygon.id === state.editingId,
+      );
+      editingPolygon.positions = action.payload;
+    },
+    resetCurrentPolygon: (state) => {
+      state.currentPolygon = {};
+      state.selectedId = -1;
+      state.editingId = -1;
     },
     addPolygon: (state) => {
       state.polygons = [...state.polygons, state.currentPolygon];
+      state.no += 1;
+    },
+    removePolygon: (state, action) => {
+      state.polygons = state.polygons.filter(
+        (polygon) => polygon.id !== action.payload,
+      );
     },
   },
 });
 
 // Action creators are generated for each case reducer function
 export const {
+  newCurrentPolygon,
   setSelectedPolygonId,
-  setCurrentPolygon,
-  addPositionToCurrent,
+  setEditingId,
+  setCurrentPolygonName,
+  setEditingPolygonName,
+  addPositiontoCurrentPolygon,
+  setCurrentPolygonPositions,
+  setEditingPolygonPositions,
+  resetCurrentPolygon,
   addPolygon,
+  removePolygon,
 } = polygonSlice.actions;
 
 export default polygonSlice.reducer;

@@ -13,14 +13,15 @@ import MapPolygon from "../components/MapPolygon";
 import { setStatus } from "../store/slices/globalSlice";
 import {
   newCurrentMarker,
-  resetCurrentMarker,
   setCurrentMarkerPosition,
+  resetCurrentMarker,
   addMarker,
 } from "../store/slices/markerSlice";
 import {
+  newCurrentPolygon,
   setSelectedPolygonId,
-  setCurrentPolygon,
-  addPositionToCurrent,
+  addPositiontoCurrentPolygon,
+  resetCurrentPolygon,
   addPolygon,
 } from "../store/slices/polygonSlice";
 import {
@@ -56,12 +57,12 @@ const MapContainer = () => {
 
   const handleDrawPolygon = () => {
     dispatch(setStatus(POLYGON_DRAWING_STATUS));
-    dispatch(setCurrentPolygon([]));
+    dispatch(newCurrentPolygon());
   };
 
   const handleCancel = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
-      dispatch(setCurrentPolygon([]));
+      dispatch(resetCurrentPolygon());
     } else {
       dispatch(resetCurrentMarker());
     }
@@ -71,7 +72,7 @@ const MapContainer = () => {
   const handleSave = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
       dispatch(addPolygon());
-      dispatch(setCurrentPolygon([]));
+      dispatch(resetCurrentPolygon());
       dispatch(setStatus(NORMAL_STATUS));
     } else if (currentStatus === MARKER_ADDING_STATUS) {
       dispatch(addMarker());
@@ -92,7 +93,7 @@ const MapContainer = () => {
       ) {
         dispatch(setCurrentMarkerPosition({ lat, lng }));
       } else {
-        dispatch(addPositionToCurrent({ lat, lng }));
+        dispatch(addPositiontoCurrentPolygon({ lat, lng }));
       }
     } else {
       console.warn("Invalid coordinates received from map click:", {
@@ -177,7 +178,7 @@ const MapContainer = () => {
           ))}
         {currentStatus === POLYGON_DRAWING_STATUS &&
           currentPolygon &&
-          currentPolygon.positions.length && (
+          currentPolygon.positions?.length && (
             <>
               <MapPolygon
                 type="current"
@@ -191,8 +192,7 @@ const MapContainer = () => {
               />
             </>
           )}
-        {allPolygons &&
-          allPolygons.length &&
+        {allPolygons?.length > 0 &&
           allPolygons.map((polygon) => (
             <MapPolygon
               type={selectedPolygonId === polygon.id ? "selected" : "normal"}
