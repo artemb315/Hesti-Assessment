@@ -42,7 +42,7 @@ import {
   setSelectedMarkerId,
   setEditingId,
   setCurrentMarkerName,
-  setMarkerNameById,
+  setEditingMarkerName,
   setCurrentMarkerPosition,
   resetCurrentMarker,
   addMarker,
@@ -196,7 +196,7 @@ const EditingRow = ({
     const name = event.target.value;
 
     if (isEditing) {
-      dispatch(setMarkerNameById({ id: marker.id, name }));
+      dispatch(setEditingMarkerName(name));
     } else {
       dispatch(setCurrentMarkerName(name));
     }

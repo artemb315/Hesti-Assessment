@@ -28,11 +28,11 @@ export const markerSlice = createSlice({
     setCurrentMarkerName: (state, action) => {
       state.currentMarker.name = action.payload;
     },
-    setMarkerNameById: (state, action) => {
-      const { id, name } = action.payload;
-      state.markers = state.markers.map((marker) =>
-        marker.id === id ? { ...marker, name } : marker,
+    setEditingMarkerName: (state, action) => {
+      const editingMarker = state.markers.find(
+        (marker) => marker.id === state.editingId,
       );
+      editingMarker.name = action.payload;
     },
     setCurrentMarkerPosition: (state, action) => {
       state.currentMarker.position = action.payload;
@@ -66,7 +66,7 @@ export const {
   setSelectedMarkerId,
   setEditingId,
   setCurrentMarkerName,
-  setMarkerNameById,
+  setEditingMarkerName,
   setCurrentMarkerPosition,
   setCurrentMarkerLat,
   setCurrentMarkerLng,
