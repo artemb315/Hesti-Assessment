@@ -43,7 +43,8 @@ import {
   setEditingId,
   setCurrentMarkerName,
   setEditingMarkerName,
-  setCurrentMarkerPosition,setEditingMarkerPosition,
+  setCurrentMarkerPosition,
+  setEditingMarkerPosition,
   resetCurrentMarker,
   addMarker,
   removeMarker,
@@ -174,10 +175,8 @@ EnhancedTableHead.propTypes = {
   rowCount: PropTypes.number.isRequired,
 };
 
-const EditingRow = ({
+const ComplexRow = ({
   marker,
-  handleSave,
-  handleCancel,
   formatNumber,
   formatPosition,
   isEditing = false,
@@ -202,7 +201,12 @@ const EditingRow = ({
     }
   };
 
-  const handleUpdatePosition = () => {
+  const handleReset = () => {
+    dispatch(resetCurrentMarker());
+    dispatch(setStatus(NORMAL_STATUS));
+  };
+
+  const handleSave = () => {
     const latNum = Number(lat);
     const lngNum = Number(lng);
     if (!isNaN(latNum) && !isNaN(lngNum)) {
@@ -211,13 +215,19 @@ const EditingRow = ({
         dispatch(setEditingMarkerPosition(updatedPosition));
       } else {
         dispatch(setCurrentMarkerPosition(updatedPosition));
-        handleSave();
+        dispatch(addMarker());
       }
+      handleReset()
     }
   };
 
   const handleClearPosition = () => {
-    dispatch(setCurrentMarkerPosition({ lat: 0, lng: 0 }));
+    const nonPosition = { lat: 0, lng: 0 }
+    if (isEditing) {
+      dispatch(setEditingMarkerPosition(nonPosition));
+    } else {
+      dispatch(setCurrentMarkerPosition(nonPosition));
+    }
   };
 
   return (
@@ -263,10 +273,10 @@ const EditingRow = ({
               />
             </div>
             <div className="flex justify-center gap-4 p-4">
-              <CancelButton className="basis-2/5" onClick={handleCancel} />
+              <CancelButton className="basis-2/5" onClick={handleReset} />
               <SaveButton
                 className="basis-3/5"
-                onClick={handleUpdatePosition}
+                onClick={handleSave}
               />
             </div>
           </div>
@@ -274,7 +284,7 @@ const EditingRow = ({
       </td>
       <td className="w-full flex justify-center gap-4">
         <CheckIconButton onClick={handleSave} />
-        <CloseIconButton onClick={handleCancel} />
+        <CloseIconButton onClick={handleReset} />
       </td>
     </tr>
   );
@@ -337,17 +347,6 @@ export default function TableSortAndSelection() {
   const formatNumber = (num) => {
     if (typeof num !== "number") return "";
     return `${num.toFixed(4)}`;
-  };
-
-  const handleCancel = () => {
-    dispatch(resetCurrentMarker());
-    dispatch(setStatus(NORMAL_STATUS));
-  };
-
-  const handleSave = () => {
-    dispatch(addMarker());
-    dispatch(resetCurrentMarker());
-    dispatch(setStatus(NORMAL_STATUS));
   };
 
   const handleEdit = (id) => (event) => {
@@ -415,11 +414,9 @@ export default function TableSortAndSelection() {
 
                 if (isEditing) {
                   return (
-                    <EditingRow
+                    <ComplexRow
                       key={row.id}
                       marker={row}
-                      handleSave={handleSave}
-                      handleCancel={handleCancel}
                       formatNumber={formatNumber}
                       formatPosition={formatPosition}
                       isEditing={isEditing}
@@ -524,10 +521,8 @@ export default function TableSortAndSelection() {
             </tr>
           )}
           {currentStatus === MARKER_ADDING_STATUS && (
-            <EditingRow
+            <ComplexRow
               marker={currentMarker}
-              handleSave={handleSave}
-              handleCancel={handleCancel}
               formatNumber={formatNumber}
               formatPosition={formatPosition}
             />
