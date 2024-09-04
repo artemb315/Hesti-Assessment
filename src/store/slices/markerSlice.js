@@ -49,8 +49,13 @@ export const markerSlice = createSlice({
       state.editingId = -1;
     },
     addMarker: (state) => {
-      state.markers = [...state.markers, state.currentMarker];
-      state.no += 1;
+      if (
+        state.currentMarker.position.lat &&
+        state.currentMarker.position.lng
+      ) {
+        state.markers = [...state.markers, state.currentMarker];
+        state.no += 1;
+      }
     },
     removeMarker: (state, action) => {
       state.markers = state.markers.filter(

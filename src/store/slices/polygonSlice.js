@@ -55,8 +55,10 @@ export const polygonSlice = createSlice({
       state.editingId = -1;
     },
     addPolygon: (state) => {
-      state.polygons = [...state.polygons, state.currentPolygon];
-      state.no += 1;
+      if (state.currentPolygon.positions?.length) {
+        state.polygons = [...state.polygons, state.currentPolygon];
+        state.no += 1;
+      }
     },
     removePolygon: (state, action) => {
       state.polygons = state.polygons.filter(
