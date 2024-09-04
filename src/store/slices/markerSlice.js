@@ -43,12 +43,6 @@ export const markerSlice = createSlice({
       );
       editingMarker.position = action.payload;
     },
-    setCurrentMarkerLat: (state, action) => {
-      state.currentMarker.position.lat = action.payload;
-    },
-    setCurrentMarkerLng: (state, action) => {
-      state.currentMarker.position.lng = action.payload;
-    },
     resetCurrentMarker: (state) => {
       state.currentMarker = {};
       state.selectedId = -1;
@@ -75,8 +69,6 @@ export const {
   setEditingMarkerName,
   setCurrentMarkerPosition,
   setEditingMarkerPosition,
-  setCurrentMarkerLat,
-  setCurrentMarkerLng,
   resetCurrentMarker,
   addMarker,
   removeMarker,
