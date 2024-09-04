@@ -43,7 +43,7 @@ import {
   setEditingId,
   setCurrentMarkerName,
   setEditingMarkerName,
-  setCurrentMarkerPosition,
+  setCurrentMarkerPosition,setEditingMarkerPosition,
   resetCurrentMarker,
   addMarker,
   removeMarker,
@@ -206,8 +206,13 @@ const EditingRow = ({
     const latNum = Number(lat);
     const lngNum = Number(lng);
     if (!isNaN(latNum) && !isNaN(lngNum)) {
-      dispatch(setCurrentMarkerPosition({ lat: latNum, lng: lngNum }));
-      handleSave();
+      const updatedPosition = { lat: latNum, lng: lngNum };
+      if (isEditing) {
+        dispatch(setEditingMarkerPosition(updatedPosition));
+      } else {
+        dispatch(setCurrentMarkerPosition(updatedPosition));
+        handleSave();
+      }
     }
   };
 
@@ -340,9 +345,7 @@ export default function TableSortAndSelection() {
   };
 
   const handleSave = () => {
-    if (editingId < 0) {
-      dispatch(addMarker());
-    }
+    dispatch(addMarker());
     dispatch(resetCurrentMarker());
     dispatch(setStatus(NORMAL_STATUS));
   };
