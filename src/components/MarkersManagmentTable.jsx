@@ -4,6 +4,7 @@ import { useSelector, useDispatch } from "react-redux";
 import {
   Box,
   Table,
+  Button,
   Typography,
   Sheet,
   FormControl,
@@ -24,6 +25,7 @@ import KeyboardArrowRightIcon from "@mui/icons-material/KeyboardArrowRight";
 import KeyboardArrowDown from "@mui/icons-material/KeyboardArrowDown";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import { visuallyHidden } from "@mui/utils";
@@ -36,6 +38,7 @@ import SaveButton from "./SaveButton";
 
 import { setStatus } from "../store/slices/globalSlice";
 import {
+  newCurrentMarker,
   setSelectedMarkerId,
   setEditingId,
   setCurrentMarkerName,
@@ -305,6 +308,11 @@ export default function TableSortAndSelection() {
     setPage(0);
   };
 
+  const handleAdd = () => {
+    dispatch(setStatus(MARKER_ADDING_STATUS));
+    dispatch(newCurrentMarker());
+  };
+
   const getLabelDisplayedRowsTo = () => {
     if (rows.length === -1) {
       return (page + 1) * rowsPerPage;
@@ -357,7 +365,7 @@ export default function TableSortAndSelection() {
         aria-labelledby="tableTitle"
         borderAxis="xBetween"
         variant="plain"
-        hoverRow
+        hoverRow={!!rows.length}
         sx={{
           "--TableCell-headBackground": "transparent",
           "--TableCell-selectedBackground": "#F1DAFF",
@@ -394,98 +402,124 @@ export default function TableSortAndSelection() {
           rowCount={rows.length}
         />
         <tbody>
-          {[...rows]
-            .sort(getComparator(order, orderBy))
-            .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-            .map((row) => {
-              const isItemSelected = selectedId === row.id;
-              const isEditing = editingId === row.id;
+          {rows.length || currentStatus === MARKER_ADDING_STATUS ? (
+            [...rows]
+              .sort(getComparator(order, orderBy))
+              .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+              .map((row) => {
+                const isItemSelected = selectedId === row.id;
+                const isEditing = editingId === row.id;
 
-              if (isEditing) {
+                if (isEditing) {
+                  return (
+                    <EditingRow
+                      key={row.id}
+                      marker={row}
+                      handleSave={handleSave}
+                      handleCancel={handleCancel}
+                      formatNumber={formatNumber}
+                      formatPosition={formatPosition}
+                      isEditing={isEditing}
+                    />
+                  );
+                }
+
                 return (
-                  <EditingRow
-                    key={row.id}
-                    marker={row}
-                    handleSave={handleSave}
-                    handleCancel={handleCancel}
-                    formatNumber={formatNumber}
-                    formatPosition={formatPosition}
-                    isEditing={isEditing}
-                  />
+                  <tr
+                    onClick={handleClick(row.id)}
+                    aria-checked={isItemSelected}
+                    tabIndex={-1}
+                    key={row.name}
+                    style={
+                      isItemSelected
+                        ? {
+                            "--TableCell-dataBackground":
+                              "var(--TableCell-selectedBackground)",
+                            "--TableCell-headBackground":
+                              "var(--TableCell-selectedBackground)",
+                          }
+                        : {}
+                    }
+                  >
+                    <td>{row.name}</td>
+                    <td>{formatPosition(row.position)}</td>
+                    <td>
+                      <Dropdown>
+                        <MenuButton
+                          slots={{ root: IconButton }}
+                          slotProps={{
+                            root: { variant: "plain", color: "neutral" },
+                          }}
+                          sx={{
+                            "&:hover": {
+                              color: "#57167E",
+                              borderRadius: "50%",
+                              border: "1px solid #57167E",
+                              backgroundColor: "transparent",
+                            },
+                          }}
+                          onClick={(event) => event.stopPropagation()}
+                        >
+                          <MoreVertIcon />
+                        </MenuButton>
+                        <Menu>
+                          <MenuItem
+                            sx={{
+                              "&:hover": {
+                                backgroundColor: "#F1DAFF",
+                              },
+                            }}
+                            onClick={handleEdit(row.id)}
+                          >
+                            <ListItemDecorator>
+                              <EditIcon />
+                            </ListItemDecorator>{" "}
+                            Edit
+                          </MenuItem>
+                          <MenuItem
+                            sx={{
+                              "&:hover": {
+                                backgroundColor: "#F1DAFF",
+                              },
+                            }}
+                            onClick={handleDelete(row.id)}
+                          >
+                            <ListItemDecorator sx={{ color: "inherit" }}>
+                              <DeleteIcon />
+                            </ListItemDecorator>{" "}
+                            Delete
+                          </MenuItem>
+                        </Menu>
+                      </Dropdown>
+                    </td>
+                  </tr>
                 );
-              }
-
-              return (
-                <tr
-                  onClick={handleClick(row.id)}
-                  aria-checked={isItemSelected}
-                  tabIndex={-1}
-                  key={row.name}
-                  style={
-                    isItemSelected
-                      ? {
-                          "--TableCell-dataBackground":
-                            "var(--TableCell-selectedBackground)",
-                          "--TableCell-headBackground":
-                            "var(--TableCell-selectedBackground)",
-                        }
-                      : {}
-                  }
-                >
-                  <td>{row.name}</td>
-                  <td>{formatPosition(row.position)}</td>
-                  <td>
-                    <Dropdown>
-                      <MenuButton
-                        slots={{ root: IconButton }}
-                        slotProps={{
-                          root: { variant: "plain", color: "neutral" },
-                        }}
-                        sx={{
-                          "&:hover": {
-                            color: "#57167E",
-                            borderRadius: "50%",
-                            border: "1px solid #57167E",
-                            backgroundColor: "transparent",
-                          },
-                        }}
-                        onClick={(event) => event.stopPropagation()}
-                      >
-                        <MoreVertIcon />
-                      </MenuButton>
-                      <Menu>
-                        <MenuItem
-                          sx={{
-                            "&:hover": {
-                              backgroundColor: "#F1DAFF",
-                            },
-                          }}
-                          onClick={handleEdit(row.id)}
-                        >
-                          <ListItemDecorator>
-                            <EditIcon />
-                          </ListItemDecorator>{" "}
-                          Edit
-                        </MenuItem>
-                        <MenuItem
-                          sx={{
-                            "&:hover": {
-                              backgroundColor: "#F1DAFF",
-                            },
-                          }}
-                          onClick={handleDelete(row.id)}
-                        >
-                          <ListItemDecorator sx={{ color: "inherit" }}>
-                            <DeleteIcon />
-                          </ListItemDecorator>{" "}
-                          Delete
-                        </MenuItem>
-                      </Menu>
-                    </Dropdown>
-                  </td>
-                </tr>
-              );
-            })}
+              })
+          ) : (
+            <tr>
+              <td colSpan={3}>
+                <div className="flex flex-col gap-4 justify-center items-center w-full h-[30vh]">
+                  <span className="text-lg text-[#3E4970]">
+                    There are no markers
+                  </span>
+                  <Button
+                    variant="outlined"
+                    startDecorator={<AddOutlinedIcon />}
+                    sx={{
+                      color: "#57167E",
+                      borderColor: "#57167E",
+                      "&:hover": {
+                        backgroundColor: "rgba(87, 22, 126, 0.2)",
+                      },
+                    }}
+                    onClick={handleAdd}
+                  >
+                    Add your first marker
+                  </Button>
+                </div>
+              </td>
+            </tr>
+          )}
           {currentStatus === MARKER_ADDING_STATUS && (
             <EditingRow
               marker={currentMarker}
