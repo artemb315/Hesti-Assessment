@@ -12,11 +12,13 @@ import MapPolygon from "../components/MapPolygon";
 
 import { setStatus } from "../store/slices/globalSlice";
 import {
+  newCurrentMarker,
+  resetCurrentMarker,
   setCurrentMarkerPosition,
-  addMarkerPosition,
+  addMarker,
 } from "../store/slices/markerSlice";
 import {
-  setSelectedPolygonIndex,
+  setSelectedPolygonId,
   setCurrentPolygon,
   addPositionToCurrent,
   addPolygon,
@@ -25,17 +27,16 @@ import {
   NORMAL_STATUS,
   POLYGON_DRAWING_STATUS,
   MARKER_ADDING_STATUS,
+  MARKER_EDITING_STATUS,
 } from "../constants";
 
 const MapContainer = () => {
   const currentStatus = useSelector((state) => state.global.status);
-  const currentMarker = useSelector(
-    (state) => state.marker.currentMarkerPosition,
-  );
-  const markerPositions = useSelector((state) => state.marker.markerPositions);
-  const selectedPolygonIndex = useSelector(
-    (state) => state.polygon.selectedIndex,
-  );
+
+  const currentMarker = useSelector((state) => state.marker.currentMarker);
+  const allMarkers = useSelector((state) => state.marker.markers);
+
+  const selectedPolygonId = useSelector((state) => state.polygon.selectedId);
   const currentPolygon = useSelector((state) => state.polygon.currentPolygon);
   const allPolygons = useSelector((state) => state.polygon.polygons);
 
@@ -50,7 +51,7 @@ const MapContainer = () => {
 
   const handleAddMarker = () => {
     dispatch(setStatus(MARKER_ADDING_STATUS));
-    dispatch(setCurrentMarkerPosition({ lat: null, lng: null }));
+    dispatch(newCurrentMarker());
   };
 
   const handleDrawPolygon = () => {
@@ -62,7 +63,7 @@ const MapContainer = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
       dispatch(setCurrentPolygon([]));
     } else {
-      dispatch(setCurrentMarkerPosition({ lat: null, lng: null }));
+      dispatch(resetCurrentMarker());
     }
     dispatch(setStatus(NORMAL_STATUS));
   };
@@ -70,9 +71,11 @@ const MapContainer = () => {
   const handleSave = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
       dispatch(addPolygon());
+      dispatch(setCurrentPolygon([]));
       dispatch(setStatus(NORMAL_STATUS));
     } else if (currentStatus === MARKER_ADDING_STATUS) {
-      dispatch(addMarkerPosition());
+      dispatch(addMarker());
+      dispatch(resetCurrentMarker());
       dispatch(setStatus(NORMAL_STATUS));
     }
   };
@@ -83,7 +86,10 @@ const MapContainer = () => {
     const lat = event.latLng.lat();
     const lng = event.latLng.lng();
     if (!isNaN(lat) && !isNaN(lng)) {
-      if (currentStatus === MARKER_ADDING_STATUS) {
+      if (
+        currentStatus === MARKER_ADDING_STATUS ||
+        currentStatus === MARKER_EDITING_STATUS
+      ) {
         dispatch(setCurrentMarkerPosition({ lat, lng }));
       } else {
         dispatch(addPositionToCurrent({ lat, lng }));
@@ -96,10 +102,10 @@ const MapContainer = () => {
     }
   };
 
-  const handlePolygonClick = (index) => {
+  const handlePolygonClick = (id) => {
     if (!isNormalStatus) return;
 
-    dispatch(setSelectedPolygonIndex(index));
+    dispatch(setSelectedPolygonId(id));
   };
 
   return (
@@ -153,38 +159,46 @@ const MapContainer = () => {
           )}
         </div>
         {currentStatus === MARKER_ADDING_STATUS &&
-          currentMarker?.lat &&
-          currentMarker?.lng && (
-            <MapMarker coord={currentMarker} type={MARKER_ADDING_STATUS} />
-          )}
-        {markerPositions &&
-          markerPositions.length &&
-          markerPositions.map((position, index) => (
+          currentMarker.position?.lat &&
+          currentMarker.position?.lng && (
             <MapMarker
-              key={index}
-              coord={position}
+              coord={currentMarker.position}
+              type={MARKER_ADDING_STATUS}
+            />
+          )}
+        {allMarkers &&
+          allMarkers.length &&
+          allMarkers.map((marker) => (
+            <MapMarker
+              key={marker.id}
+              coord={marker.position}
               type={MARKER_ADDING_STATUS}
             />
           ))}
         {currentStatus === POLYGON_DRAWING_STATUS &&
           currentPolygon &&
-          currentPolygon.length && (
+          currentPolygon.positions.length && (
             <>
-              <MapPolygon type="current" coordinates={currentPolygon} />
+              <MapPolygon
+                type="current"
+                coordinates={currentPolygon.positions}
+              />
               <MapMarker
-                coord={currentPolygon[currentPolygon.length - 1]}
+                coord={
+                  currentPolygon.positions[currentPolygon.positions.length - 1]
+                }
                 type={POLYGON_DRAWING_STATUS}
               />
             </>
           )}
         {allPolygons &&
           allPolygons.length &&
-          allPolygons.map((polygon, index) => (
+          allPolygons.map((polygon) => (
             <MapPolygon
-              type={selectedPolygonIndex === index ? "selected" : "normal"}
-              key={index}
-              coordinates={polygon}
-              onClick={() => handlePolygonClick(index)}
+              type={selectedPolygonId === polygon.id ? "selected" : "normal"}
+              key={polygon.id}
+              coordinates={polygon.positions}
+              onClick={() => handlePolygonClick(polygon.id)}
             />
           ))}
       </GoogleMap>

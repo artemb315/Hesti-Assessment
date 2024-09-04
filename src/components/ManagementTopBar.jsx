@@ -10,8 +10,8 @@ import {
 } from "../constants";
 
 const ManagementTopBar = ({ tableType, setTableType }) => {
-  const allMarkers = useSelector((state) => state.marker.markerPositions);
-  const allPolygons = useSelector((state) => state.polygon.polygons);
+  const allMarkers = useSelector((state) => state.marker.markerPositions) || [];
+  const allPolygons = useSelector((state) => state.polygon.polygons) || [];
 
   const isPolygonTable = tableType === POLYGON_MANAGEMENT_TABLE;
   const currentCount = isPolygonTable ? allPolygons.length : allMarkers.length;
@@ -19,7 +19,7 @@ const ManagementTopBar = ({ tableType, setTableType }) => {
   const tabTexts = ["Polygon management", "Marker management"];
 
   return (
-    <div className="flex justify-between items-center">
+    <div className="flex justify-between items-center mb-6">
       <div className="flex gap-4">
         {[POLYGON_MANAGEMENT_TABLE, MARKER_MANAGEMENT_TABLE].map(
           (item, index) => (
@@ -67,7 +67,7 @@ const ManagementTopBar = ({ tableType, setTableType }) => {
             },
           }}
         >
-          Add polygon
+          Add {isPolygonTable ? "polygon" : "marker"}
         </Button>
       </div>
     </div>
