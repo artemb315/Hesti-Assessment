@@ -182,7 +182,7 @@ const EditingRow = ({
   const dispatch = useDispatch();
 
   const [lat, setLat] = useState();
-  const [lng, setLng] = useState(formatNumber(marker?.position?.lng));
+  const [lng, setLng] = useState();
 
   useEffect(() => {
     setLat(formatNumber(marker?.position?.lat));
@@ -206,6 +206,10 @@ const EditingRow = ({
       dispatch(setCurrentMarkerPosition({ lat: latNum, lng: lngNum }));
       handleSave();
     }
+  };
+
+  const handleClearPosition = () => {
+    dispatch(setCurrentMarkerPosition({ lat: 0, lng: 0 }));
   };
 
   return (
@@ -245,7 +249,10 @@ const EditingRow = ({
                 value={lng}
                 onChange={(event) => setLng(event.target.value)}
               />
-              <CloseIconButton className="basis-1/7" />
+              <CloseIconButton
+                className="basis-1/7"
+                onClick={handleClearPosition}
+              />
             </div>
             <div className="flex justify-center gap-4 p-4">
               <CancelButton className="basis-2/5" onClick={handleCancel} />

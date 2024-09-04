@@ -1,22 +1,37 @@
-import { useSelector } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { Button } from "@mui/joy";
 import FileDownloadOutlinedIcon from "@mui/icons-material/FileDownloadOutlined";
 import AddOutlinedIcon from "@mui/icons-material/AddOutlined";
 
 import ManagementTab from "./ManagementTab";
+
+import { setStatus } from "../store/slices/globalSlice";
+import { newCurrentMarker } from "../store/slices/markerSlice";
 import {
   POLYGON_MANAGEMENT_TABLE,
   MARKER_MANAGEMENT_TABLE,
 } from "../constants";
+import { MARKER_ADDING_STATUS } from "../constants";
 
 const ManagementTopBar = ({ tableType, setTableType }) => {
   const allMarkers = useSelector((state) => state.marker.markerPositions) || [];
   const allPolygons = useSelector((state) => state.polygon.polygons) || [];
 
+  const dispatch = useDispatch();
+
   const isPolygonTable = tableType === POLYGON_MANAGEMENT_TABLE;
   const currentCount = isPolygonTable ? allPolygons.length : allMarkers.length;
 
   const tabTexts = ["Polygon management", "Marker management"];
+
+  const handleAdd = () => {
+    if (isPolygonTable) {
+      console.log("add polygon");
+    } else {
+      dispatch(setStatus(MARKER_ADDING_STATUS));
+      dispatch(newCurrentMarker());
+    }
+  };
 
   return (
     <div className="flex justify-between items-center mb-6">
@@ -66,6 +81,7 @@ const ManagementTopBar = ({ tableType, setTableType }) => {
               backgroundColor: "rgba(87, 22, 126, 0.2)",
             },
           }}
+          onClick={handleAdd}
         >
           Add {isPolygonTable ? "polygon" : "marker"}
         </Button>
