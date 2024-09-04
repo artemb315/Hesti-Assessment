@@ -352,13 +352,11 @@ export default function TableSortAndSelection() {
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
   return (
-    <Sheet
-      variant="outlined"
-      sx={{ width: "100%", boxShadow: "sm", borderRadius: "sm" }}
-    >
+    <Sheet sx={{ width: "100%", boxShadow: "sm", borderRadius: "sm" }}>
       <Table
         aria-labelledby="tableTitle"
         borderAxis="xBetween"
+        variant="plain"
         hoverRow
         sx={{
           "--TableCell-headBackground": "transparent",
