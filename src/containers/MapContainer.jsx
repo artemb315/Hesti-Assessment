@@ -1,4 +1,5 @@
-import { APIProvider, Map } from "@vis.gl/react-google-maps";
+import { useState } from "react";
+import { APIProvider, Map, InfoWindow } from "@vis.gl/react-google-maps";
 import { useSelector, useDispatch } from "react-redux";
 import BorderColorOutlinedIcon from "@mui/icons-material/BorderColorOutlined";
 import RoomOutlinedIcon from "@mui/icons-material/RoomOutlined";
@@ -34,26 +35,37 @@ import {
 } from "../constants";
 
 const MapContainer = () => {
+  const [infoText, setInfoText] = useState("");
+  const [tooltipPosition, setTooltipPosition] = useState(null);
+
   const currentStatus = useSelector((state) => state.global.status);
+
   const currentMarker = useSelector((state) => state.marker.currentMarker);
   const allMarkers = useSelector((state) => state.marker.markers);
+
   const selectedPolygonId = useSelector((state) => state.polygon.selectedId);
   const currentPolygon = useSelector((state) => state.polygon.currentPolygon);
   const allPolygons = useSelector((state) => state.polygon.polygons);
+
   const dispatch = useDispatch();
+
   const isNormalStatus = currentStatus === NORMAL_STATUS;
+
   const initialCenter = {
     lat: 40.748817,
     lng: -73.985428,
   };
+
   const handleAddMarker = () => {
     dispatch(setStatus(MARKER_ADDING_STATUS));
     dispatch(newCurrentMarker());
   };
+
   const handleDrawPolygon = () => {
     dispatch(setStatus(POLYGON_DRAWING_STATUS));
     dispatch(newCurrentPolygon());
   };
+
   const handleCancel = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
       dispatch(resetPolygon());
@@ -62,6 +74,7 @@ const MapContainer = () => {
     }
     dispatch(setStatus(NORMAL_STATUS));
   };
+
   const handleSave = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
       dispatch(addPolygon());
@@ -76,6 +89,7 @@ const MapContainer = () => {
     }
     dispatch(setStatus(NORMAL_STATUS));
   };
+
   const handleMapClick = (event) => {
     if (isNormalStatus) return;
     const lat = event.detail.latLng.lat;
@@ -98,9 +112,21 @@ const MapContainer = () => {
       });
     }
   };
-  const handlePolygonClick = (id) => {
+
+  const handlePolygonClick = (id) => () => {
     if (!isNormalStatus) return;
     dispatch(setSelectedPolygonId(id));
+  };
+
+  const handleHoverPolygon = (name) => (event) => {
+    setInfoText(name);
+    const lat = event.latLng.lat();
+    const lng = event.latLng.lng();
+    setTooltipPosition({ lat, lng });
+  };
+
+  const handleMouseOut = () => {
+    setTooltipPosition(null);
   };
 
   return (
@@ -205,10 +231,18 @@ const MapContainer = () => {
                 strokeWeight={4}
                 fillColor={isSelected ? "#D898FF" : "transparent"}
                 fillOpacity={isSelected ? 1 : 0}
-                onClick={() => handlePolygonClick(polygon.id)}
+                onClick={handlePolygonClick(polygon.id)}
+                onMouseOver={handleHoverPolygon(polygon.name)}
+                onMouseOut={handleMouseOut}
               />
             );
           })}
+        {tooltipPosition && (
+          <InfoWindow
+            position={tooltipPosition}
+            headerContent={<span>{infoText}</span>}
+          />
+        )}
       </Map>
     </APIProvider>
   );
