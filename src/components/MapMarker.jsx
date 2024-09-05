@@ -1,14 +1,17 @@
-import { Marker } from "@react-google-maps/api";
-import MarkerIcon from "../assets/marker.svg";
-// import PencilIcon from "../assets/pencil.svg";
+import { AdvancedMarker } from "@vis.gl/react-google-maps";
+import MarkerIcon from "../assets/marker.png";
+import PencilIcon from "../assets/pencil.png";
 import { MARKER_ADDING_STATUS } from "../constants";
 
 const MapMarker = ({ coord, type }) => {
   return (
-    <Marker
-      position={coord}
-      icon={type === MARKER_ADDING_STATUS ? MarkerIcon : null}
-    />
+    <AdvancedMarker position={coord}>
+      {type === MARKER_ADDING_STATUS ? (
+        <img src={MarkerIcon} width={24} height={24} />
+      ) : (
+        <img src={PencilIcon} width={48} height={24} />
+      )}
+    </AdvancedMarker>
   );
 };
 
