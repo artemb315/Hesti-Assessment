@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import PropTypes from "prop-types";
 import { useSelector, useDispatch } from "react-redux";
+
 import {
   Box,
   Table,
@@ -87,6 +88,12 @@ const headCells = [
     numeric: false,
     disablePadding: false,
     label: "Coordinates",
+  },
+  {
+    id: "area",
+    numeric: false,
+    disablePadding: false,
+    label: "Area",
   },
   {
     id: "actions",
@@ -179,6 +186,7 @@ const ComplexRow = ({
   polygon,
   formatNumber,
   formatPosition,
+  computeArea,
   isEditing = false,
 }) => {
   const dispatch = useDispatch();
@@ -357,6 +365,7 @@ const ComplexRow = ({
           </div>
         </Select>
       </td>
+      <td>{computeArea(positions)}</td>
       <td className="w-full flex justify-center gap-4">
         <CheckIconButton onClick={handleSave} />
         <CloseIconButton onClick={handleReset} />
@@ -435,6 +444,22 @@ export default function TableSortAndSelection() {
     dispatch(removePolygon(id));
   };
 
+  const computeArea = (positions) => {
+    if (positions.length < 3) return "0.00";
+    const numberPositions = positions.map((position) => {
+      const latNum = Number(position.lat);
+      const lngNum = Number(position.lng);
+
+      if (!isNaN(latNum) && !isNaN(lngNum)) {
+        return { lat: latNum, lng: lngNum };
+      }
+    });
+    const areaInSquareMeters =
+      google.maps.geometry.spherical.computeArea(numberPositions);
+    const areaInSquareKilometers = areaInSquareMeters / 1e6;
+    return areaInSquareKilometers.toFixed(2);
+  };
+
   const emptyRows =
     page > 0 ? Math.max(0, (1 + page) * rowsPerPage - rows.length) : 0;
   return (
@@ -452,7 +477,7 @@ export default function TableSortAndSelection() {
             color: "#253057",
           },
           "& thead th:nth-child(1)": {
-            width: "35%",
+            width: "30%",
             padding: "16px",
           },
           "& thead th:nth-child(2)": {
@@ -460,14 +485,18 @@ export default function TableSortAndSelection() {
             padding: "16px",
           },
           "& thead th:nth-child(3)": {
+            width: "10%",
+            padding: "16px",
+          },
+          "& thead th:nth-child(4)": {
             textAlign: "center",
-            width: "15%",
+            width: "10%",
             padding: "16px",
           },
           "& tr > td": {
             padding: "10px 16px 10px 16px",
           },
-          "& tr > td:nth-child(3)": {
+          "& tr > td:nth-child(4)": {
             color: "#253057",
             textAlign: "center",
           },
@@ -495,6 +524,7 @@ export default function TableSortAndSelection() {
                       polygon={row}
                       formatNumber={formatNumber}
                       formatPosition={formatPosition}
+                      computeArea={computeArea}
                       isEditing={isEditing}
                     />
                   );
@@ -523,6 +553,7 @@ export default function TableSortAndSelection() {
                         .map((position) => formatPosition(position))
                         .join(", ")}
                     </td>
+                    <td>{computeArea(row.positions)}</td>
                     <td>
                       <Dropdown>
                         <MenuButton
@@ -605,6 +636,7 @@ export default function TableSortAndSelection() {
               polygon={currentPolygon}
               formatNumber={formatNumber}
               formatPosition={formatPosition}
+              computeArea={computeArea}
             />
           )}
           {emptyRows > 0 && (
