@@ -43,7 +43,7 @@ export const markerSlice = createSlice({
       );
       editingMarker.position = action.payload;
     },
-    resetCurrentMarker: (state) => {
+    resetMarker: (state) => {
       state.currentMarker = {};
       state.selectedId = -1;
       state.editingId = -1;
@@ -74,7 +74,7 @@ export const {
   setEditingMarkerName,
   setCurrentMarkerPosition,
   setEditingMarkerPosition,
-  resetCurrentMarker,
+  resetMarker,
   addMarker,
   removeMarker,
 } = markerSlice.actions;

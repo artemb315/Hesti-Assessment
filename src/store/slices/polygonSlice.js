@@ -40,6 +40,12 @@ export const polygonSlice = createSlice({
         action.payload,
       ];
     },
+    addPositiontoEditingPolygon: (state, action) => {
+      const editingPolygon = state.polygons.find(
+        (polygon) => polygon.id === state.editingId,
+      );
+      editingPolygon.positions = [...editingPolygon.positions, action.payload];
+    },
     setCurrentPolygonPositions: (state, action) => {
       state.currentPolygon.positions = action.payload;
     },
@@ -49,7 +55,7 @@ export const polygonSlice = createSlice({
       );
       editingPolygon.positions = action.payload;
     },
-    resetCurrentPolygon: (state) => {
+    resetPolygon: (state) => {
       state.currentPolygon = {};
       state.selectedId = -1;
       state.editingId = -1;
@@ -76,9 +82,10 @@ export const {
   setCurrentPolygonName,
   setEditingPolygonName,
   addPositiontoCurrentPolygon,
+  addPositiontoEditingPolygon,
   setCurrentPolygonPositions,
   setEditingPolygonPositions,
-  resetCurrentPolygon,
+  resetPolygon,
   addPolygon,
   removePolygon,
 } = polygonSlice.actions;

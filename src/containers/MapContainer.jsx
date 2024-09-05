@@ -13,14 +13,16 @@ import { setStatus } from "../store/slices/globalSlice";
 import {
   newCurrentMarker,
   setCurrentMarkerPosition,
-  resetCurrentMarker,
+  setEditingMarkerPosition,
+  resetMarker,
   addMarker,
 } from "../store/slices/markerSlice";
 import {
   newCurrentPolygon,
   setSelectedPolygonId,
   addPositiontoCurrentPolygon,
-  resetCurrentPolygon,
+  addPositiontoEditingPolygon,
+  resetPolygon,
   addPolygon,
 } from "../store/slices/polygonSlice";
 import {
@@ -28,6 +30,7 @@ import {
   POLYGON_DRAWING_STATUS,
   MARKER_ADDING_STATUS,
   MARKER_EDITING_STATUS,
+  POLYGON_EDITING_STATUS,
 } from "../constants";
 
 const MapContainer = () => {
@@ -53,35 +56,40 @@ const MapContainer = () => {
   };
   const handleCancel = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
-      dispatch(resetCurrentPolygon());
+      dispatch(resetPolygon());
     } else {
-      dispatch(resetCurrentMarker());
+      dispatch(resetMarker());
     }
     dispatch(setStatus(NORMAL_STATUS));
   };
   const handleSave = () => {
     if (currentStatus === POLYGON_DRAWING_STATUS) {
       dispatch(addPolygon());
-      dispatch(resetCurrentPolygon());
-      dispatch(setStatus(NORMAL_STATUS));
+      dispatch(resetPolygon());
+    } else if (currentStatus === POLYGON_EDITING_STATUS) {
+      dispatch(resetPolygon());
     } else if (currentStatus === MARKER_ADDING_STATUS) {
       dispatch(addMarker());
-      dispatch(resetCurrentMarker());
-      dispatch(setStatus(NORMAL_STATUS));
+      dispatch(resetMarker());
+    } else if (currentStatus === MARKER_EDITING_STATUS) {
+      dispatch(resetMarker());
     }
+    dispatch(setStatus(NORMAL_STATUS));
   };
   const handleMapClick = (event) => {
     if (isNormalStatus) return;
     const lat = event.detail.latLng.lat;
     const lng = event.detail.latLng.lng;
     if (!isNaN(lat) && !isNaN(lng)) {
-      if (
-        currentStatus === MARKER_ADDING_STATUS ||
-        currentStatus === MARKER_EDITING_STATUS
-      ) {
-        dispatch(setCurrentMarkerPosition({ lat, lng }));
-      } else {
-        dispatch(addPositiontoCurrentPolygon({ lat, lng }));
+      const currentPosition = { lat, lng };
+      if (currentStatus === MARKER_ADDING_STATUS) {
+        dispatch(setCurrentMarkerPosition(currentPosition));
+      } else if (currentStatus === MARKER_EDITING_STATUS) {
+        dispatch(setEditingMarkerPosition(currentPosition));
+      } else if (currentStatus === POLYGON_DRAWING_STATUS) {
+        dispatch(addPositiontoCurrentPolygon(currentPosition));
+      } else if (currentStatus === POLYGON_EDITING_STATUS) {
+        dispatch(addPositiontoEditingPolygon(currentPosition));
       }
     } else {
       console.warn("Invalid coordinates received from map click:", {
@@ -146,7 +154,8 @@ const MapContainer = () => {
             </>
           )}
         </div>
-        {currentStatus === MARKER_ADDING_STATUS &&
+        {(currentStatus === MARKER_ADDING_STATUS ||
+          currentStatus === MARKER_EDITING_STATUS) &&
           currentMarker.position?.lat &&
           currentMarker.position?.lng && (
             <MapMarker
@@ -163,7 +172,8 @@ const MapContainer = () => {
               type={MARKER_ADDING_STATUS}
             />
           ))}
-        {currentStatus === POLYGON_DRAWING_STATUS &&
+        {(currentStatus === POLYGON_DRAWING_STATUS ||
+          currentStatus === POLYGON_EDITING_STATUS) &&
           currentPolygon &&
           currentPolygon.positions?.length && (
             <>

@@ -45,7 +45,7 @@ import {
   setEditingPolygonName,
   setCurrentPolygonPositions,
   setEditingPolygonPositions,
-  resetCurrentPolygon,
+  resetPolygon,
   addPolygon,
   removePolygon,
 } from "../store/slices/polygonSlice";
@@ -204,7 +204,7 @@ const ComplexRow = ({
   };
 
   const handleReset = () => {
-    dispatch(resetCurrentPolygon());
+    dispatch(resetPolygon());
     dispatch(setStatus(NORMAL_STATUS));
   };
 

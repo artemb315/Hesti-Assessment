@@ -45,7 +45,7 @@ import {
   setEditingMarkerName,
   setCurrentMarkerPosition,
   setEditingMarkerPosition,
-  resetCurrentMarker,
+  resetMarker,
   addMarker,
   removeMarker,
 } from "../store/slices/markerSlice";
@@ -202,7 +202,7 @@ const ComplexRow = ({
   };
 
   const handleReset = () => {
-    dispatch(resetCurrentMarker());
+    dispatch(resetMarker());
     dispatch(setStatus(NORMAL_STATUS));
   };
 
@@ -217,12 +217,12 @@ const ComplexRow = ({
         dispatch(setCurrentMarkerPosition(updatedPosition));
         dispatch(addMarker());
       }
-      handleReset()
+      handleReset();
     }
   };
 
   const handleClearPosition = () => {
-    const nonPosition = { lat: 0, lng: 0 }
+    const nonPosition = { lat: 0, lng: 0 };
     if (isEditing) {
       dispatch(setEditingMarkerPosition(nonPosition));
     } else {
@@ -274,10 +274,7 @@ const ComplexRow = ({
             </div>
             <div className="flex justify-center gap-4 p-4">
               <CancelButton className="basis-2/5" onClick={handleReset} />
-              <SaveButton
-                className="basis-3/5"
-                onClick={handleSave}
-              />
+              <SaveButton className="basis-3/5" onClick={handleSave} />
             </div>
           </div>
         </Select>
