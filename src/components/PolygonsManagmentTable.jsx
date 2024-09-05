@@ -46,6 +46,8 @@ import {
   setEditingPolygonName,
   setCurrentPolygonPositions,
   setEditingPolygonPositions,
+  saveOriginalPolygon,
+  resetEditingPolygon,
   resetPolygon,
   addPolygon,
   removePolygon,
@@ -212,6 +214,9 @@ const ComplexRow = ({
   };
 
   const handleReset = () => {
+    if (isEditing) {
+      dispatch(resetEditingPolygon());
+    }
     dispatch(resetPolygon());
     dispatch(setStatus(NORMAL_STATUS));
   };
@@ -227,11 +232,14 @@ const ComplexRow = ({
     });
     if (isEditing) {
       dispatch(setEditingPolygonPositions(updatedPositions));
+      dispatch(resetPolygon());
+      dispatch(setStatus(NORMAL_STATUS));
     } else {
       dispatch(setCurrentPolygonPositions(updatedPositions));
       dispatch(addPolygon());
+      dispatch(resetPolygon());
+      dispatch(setStatus(NORMAL_STATUS));
     }
-    handleReset();
   };
 
   const handleRemovePosition = (index) => () => {
@@ -437,6 +445,7 @@ export default function TableSortAndSelection() {
     event.stopPropagation();
     dispatch(setSelectedPolygonId(id));
     dispatch(setEditingId(id));
+    dispatch(saveOriginalPolygon());
     dispatch(setStatus(POLYGON_EDITING_STATUS));
   };
 

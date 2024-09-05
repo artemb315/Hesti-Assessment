@@ -45,6 +45,8 @@ import {
   setEditingMarkerName,
   setCurrentMarkerPosition,
   setEditingMarkerPosition,
+  saveOriginalMarker,
+  resetEditingMarker,
   resetMarker,
   addMarker,
   removeMarker,
@@ -202,6 +204,9 @@ const ComplexRow = ({
   };
 
   const handleReset = () => {
+    if (isEditing) {
+      dispatch(resetEditingMarker());
+    }
     dispatch(resetMarker());
     dispatch(setStatus(NORMAL_STATUS));
   };
@@ -349,6 +354,7 @@ export default function TableSortAndSelection() {
   const handleEdit = (id) => (event) => {
     event.stopPropagation();
     dispatch(setEditingId(id));
+    dispatch(saveOriginalMarker());
     dispatch(setStatus(MARKER_EDITING_STATUS));
   };
 

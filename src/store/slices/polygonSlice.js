@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   selectedId: -1,
   editingId: -1,
+  originalPolygon: {},
   currentPolygon: {},
   polygons: [],
   no: 1,
@@ -55,6 +56,19 @@ export const polygonSlice = createSlice({
       );
       editingPolygon.positions = action.payload;
     },
+    saveOriginalPolygon: (state) => {
+      const editingPolygon = state.polygons.find(
+        (polygon) => polygon.id === state.editingId,
+      );
+      state.originalPolygon = { ...editingPolygon };
+    },
+    resetEditingPolygon: (state) => {
+      state.polygons = state.polygons.map((polygon) =>
+        polygon.id === state.originalPolygon.id
+          ? state.originalPolygon
+          : polygon,
+      );
+    },
     resetPolygon: (state) => {
       state.currentPolygon = {};
       state.selectedId = -1;
@@ -85,6 +99,8 @@ export const {
   addPositiontoEditingPolygon,
   setCurrentPolygonPositions,
   setEditingPolygonPositions,
+  saveOriginalPolygon,
+  resetEditingPolygon,
   resetPolygon,
   addPolygon,
   removePolygon,

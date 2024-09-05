@@ -67,7 +67,10 @@ const MapContainer = () => {
   };
 
   const handleCancel = () => {
-    if (currentStatus === POLYGON_DRAWING_STATUS) {
+    if (
+      currentStatus === POLYGON_DRAWING_STATUS ||
+      currentStatus === POLYGON_EDITING_STATUS
+    ) {
       dispatch(resetPolygon());
     } else {
       dispatch(resetMarker());

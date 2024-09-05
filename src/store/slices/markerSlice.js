@@ -3,6 +3,7 @@ import { createSlice } from "@reduxjs/toolkit";
 const initialState = {
   selectedId: -1,
   editingId: -1,
+  originalMarker: {},
   currentMarker: {},
   markers: [],
   no: 1,
@@ -43,6 +44,19 @@ export const markerSlice = createSlice({
       );
       editingMarker.position = action.payload;
     },
+    saveOriginalMarker: (state) => {
+      const editingMarker = state.markers.find(
+        (marker) => marker.id === state.editingId,
+      );
+      state.originalMarker = { ...editingMarker };
+    },
+    resetEditingMarker: (state) => {
+      state.markers = state.markers.map((marker) =>
+        marker.id === state.originalMarker.id
+          ? state.originalMarker
+          : marker,
+      );
+    },
     resetMarker: (state) => {
       state.currentMarker = {};
       state.selectedId = -1;
@@ -74,6 +88,8 @@ export const {
   setEditingMarkerName,
   setCurrentMarkerPosition,
   setEditingMarkerPosition,
+  saveOriginalMarker,
+  resetEditingMarker,
   resetMarker,
   addMarker,
   removeMarker,
